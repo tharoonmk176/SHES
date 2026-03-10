@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Hostel Energy Saver</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d2818;
+      color: #fff;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    header h1  { font-size: 20px; color: #22c55e; }
+    header p   { font-size: 12px; color: #a3c4a8; margin-top: 3px; }
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1b3a28;
+      border: 1px solid #2d5a3d;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      color: #a3c4a8;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 1.5s infinite;
+    }
+    .dot.red { background: #ef4444; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    /* ── API Bar ── */
+    .api-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1b3a28;
+      border: 1px solid #2d5a3d;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .api-bar label { font-size: 12px; color: #a3c4a8; }
+    .api-bar input {
+      background: #0d2818;
+      border: 1px solid #2d5a3d;
+      border-radius: 6px;
+      color: #22c55e;
+      font-size: 12px;
+      padding: 5px 10px;
+      font-family: monospace;
+      width: 210px;
+    }
+    .api-bar input:focus { outline: none; border-color: #22c55e; }
+    .btn-save {
+      background: #0d9488;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 14px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-save:hover { background: #0f766e; }
+    #connMsg { font-size: 12px; margin-left: auto; }
+
+    /* ── Cards Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: #1b3a28;
+      border: 1px solid #2d5a3d;
+      border-radius: 12px;
+      padding: 18px 20px;
+      transition: border-color 0.3s;
+    }
+    .card:hover { border-color: #22c55e; }
+    .card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #a3c4a8;
+      margin-bottom: 10px;
+    }
+    .card-val {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .pill.green { background: #22c55e; color: #0d2818; }
+    .pill.red   { background: #ef4444; color: #fff; }
+    .pill.gray  { background: #334155; color: #94a3b8; }
+
+    /* ── Event Row ── */
+    .event-row {
+      background: #1b3a28;
+      border: 1px solid #2d5a3d;
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .event-row .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #a3c4a8; margin-bottom: 4px; }
+    .event-row .txt { font-size: 14px; }
+    .event-row .time { font-size: 11px; color: #4b7a5a; white-space: nowrap; }
+
+    /* ── Override Bar ── */
+    #overrideBar {
+      background: #1c3a1a;
+      border: 1px solid #22c55e;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 13px;
+      color: #22c55e;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ── Controls ── */
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 11px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:hover  { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+    .btn-on  { background: #22c55e; color: #0d2818; }
+    .btn-off { background: #ef4444; color: #fff; }
+
+    #errMsg {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #ef4444;
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div>
+    <h1>🏠 Smart Hostel Energy Saver</h1>
+    <p> DTL</p>
+  </div>
+  <div class="badge-live">
+    <span class="dot" id="liveDot"></span>
+    <span id="liveText">Connecting...</span>
+  </div>
+</header>
+
+<!-- API URL bar -->
+<div class="api-bar">
+  <label>ESP32 API:</label>
+  <input type="text" id="apiUrl" value="http://localhost:8180"/>
+  <button class="btn-save" onclick="saveUrl()">Connect</button>
+  <span id="connMsg"></span>
+</div>
+
+<!-- Stats -->
+<div class="grid">
+
+  <div class="card">
+    <div class="card-label">Relay / Light</div>
+    <div class="card-val" id="relayVal" style="color:#22c55e">--</div>
+    <span class="pill gray" id="relayPill">--</span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">PIR Sensor</div>
+    <div class="card-val" id="motionVal" style="color:#a78bfa">--</div>
+    <span class="pill gray" id="motionPill">--</span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Motion Count</div>
+    <div class="card-val" id="countVal" style="color:#fbbf24">--</div>
+    <span class="pill gray">total today</span>
+  </div>
+
+  <div class="card">
+    <div class="card-label">LDR Value</div>
+    <div class="card-val" id="ldrVal" style="color:#0d9488">--</div>
+    <span class="pill gray" id="darkPill">--</span>
+  </div>
+
+</div>
+
+<!-- Last event -->
+<div class="event-row">
+  <div>
+    <div class="lbl">Last Event</div>
+    <div class="txt" id="lastEvent">Waiting for data...</div>
+  </div>
+  <div class="time" id="lastUpdated">--</div>
+</div>
+
+<!-- Override active banner -->
+<div id="overrideBar">⚡ Manual override is active — auto logic paused</div>
+
+<!-- Controls -->
+<div class="controls">
+  <button class="btn btn-on"  onclick="controlRelay('on') ">💡 Force ON</button>
+  <button class="btn btn-off" onclick="controlRelay('off')">🔌 Force OFF</button>
+</div>
+
+<div id="errMsg"></div>
+
+<script>
+  // ── Config ────────────────────────────────
+  let API = "http://localhost:8180";
+
+  function saveUrl() {
+    API = document.getElementById("apiUrl").value.trim().replace(/\/$/, "");
+    document.getElementById("connMsg").textContent = "Saved — reconnecting...";
+    document.getElementById("connMsg").style.color = "#a3c4a8";
+    fetchData();
+  }
+
+  // ── Helpers ───────────────────────────────
+  function setText(id, val)   { document.getElementById(id).textContent = val; }
+  function setColor(id, col)  { document.getElementById(id).style.color = col; }
+  function setPill(id, text, cls) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className   = "pill " + cls;
+  }
+
+  // ── Fetch sensor data ─────────────────────
+  async function fetchData() {
+    try {
+      const res  = await fetch(API + "/data", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const d = await res.json();
+
+      // Relay
+      setText ("relayVal",  d.relay ? "ON" : "OFF");
+      setColor("relayVal",  d.relay ? "#22c55e" : "#ef4444");
+      setPill ("relayPill", d.relay ? "Active" : "Inactive", d.relay ? "green" : "red");
+
+      // PIR
+      setText ("motionVal",  d.motion ? "Detected" : "Idle");
+      setColor("motionVal",  d.motion ? "#22c55e" : "#a78bfa");
+      setPill ("motionPill", d.motion ? "Heat detected" : "No heat", d.motion ? "green" : "gray");
+
+      // Count + LDR
+      setText("countVal", d.motionCount);
+      setText("ldrVal",   d.ldr);
+      setPill("darkPill", d.isDark ? "Dark" : "Bright", d.isDark ? "green" : "red");
+
+      // Last event + timestamp
+      setText("lastEvent",   d.lastEvent);
+      setText("lastUpdated", "Updated: " + new Date().toLocaleTimeString());
+
+      // Override banner
+      document.getElementById("overrideBar").style.display = d.override ? "block" : "none";
+
+      // Connection indicator
+      document.getElementById("liveDot").className   = "dot";
+      setText("liveText", "Live");
+      setText("errMsg", "");
+      setText("connMsg", "");
+
+    } catch (e) {
+      document.getElementById("liveDot").className   = "dot red";
+      setText("liveText", "Disconnected");
+      setText("errMsg",   "⚠ Cannot reach ESP32 at " + API + " — is simulation running?");
+    }
+  }
+
+  // ── Relay control ─────────────────────────
+  async function controlRelay(state) {
+    try {
+      const res = await fetch(API + "/relay?state=" + state, { method: "POST" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      await fetchData();
+    } catch (e) {
+      setText("errMsg", "⚠ Control request failed — check connection");
+    }
+  }
+
+  // ── Auto refresh every 2 seconds ──────────
+  fetchData();
+  setInterval(fetchData, 2000);
+</script>
+</body>
+</html>
