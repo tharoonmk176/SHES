@@ -1,8 +1,9 @@
-# 🏠 Smart Hostel Energy Saver System (SHES)
+#  Smart Hostel Energy Saver System (SHES)
 
 > Automatic room power cutoff using PIR heat detection — saves energy when no occupant is present.
 
 **Author:** THAROON M K 
+
 **Platform:** ESP32 DevKit C V4  
 **Simulated on:** [Wokwi](https://wokwi.com/projects/456377440609481729)  
 **IDE:** VS Code + PlatformIO + Wokwi Extension
