@@ -52,7 +52,7 @@ void handleRoot() {
 void handleData() {
   setCORS();
   int  ldr    = analogRead(LDR_PIN);
-  bool isDark = ldr < 2000;
+  bool isDark = ldr > 2000;
   bool motion = digitalRead(PIR_PIN);
 
   String json = "{";
