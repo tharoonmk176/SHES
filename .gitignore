@@ -1,6 +1,40 @@
-.pio
+# PlatformIO / embedded
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# VS Code
 .vscode/.browse.c_cpp.db*
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-wokwi-env
+
+# Local simulator environment
+wokwi-env/
+
+# Python backend
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+__pycache__/
+*.py[cod]
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/db.sqlite3
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
+
+# Local prompt docs
+.PROMPT.md
